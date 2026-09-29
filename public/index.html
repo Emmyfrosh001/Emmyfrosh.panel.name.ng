@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#020d07" />
+<title>Node Panel</title>
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/5.3.0/css/xterm.min.css" />
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-apps" viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 17 9 5 9-5"/></symbol>
+  <symbol id="i-term" viewBox="0 0 24 24"><path d="m6 8 5 4-5 4"/><path d="M13 17h6"/></symbol>
+  <symbol id="i-files" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.5"/><circle cx="8" cy="17" r="2.5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-ram" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+</svg>
+
+<div class="shell">
+  <nav class="rail" aria-label="Sections">
+    <button class="rail-btn is-active" data-view="apps" aria-label="Apps" title="Apps"><svg><use href="#i-apps"/></svg></button>
+    <button class="rail-btn" data-view="console" aria-label="Console" title="Console"><svg><use href="#i-term"/></svg></button>
+    <button class="rail-btn" data-view="files" aria-label="Files" title="Files"><svg><use href="#i-files"/></svg></button>
+    <button class="rail-btn" data-view="settings" aria-label="Settings" title="Settings"><svg><use href="#i-sliders"/></svg></button>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <label class="search">
+        <span class="sr-only">Search apps</span>
+        <input id="search" type="search" placeholder="Search" autocomplete="off" />
+        <svg><use href="#i-search"/></svg>
+      </label>
+      <button id="createBtn" class="icon-btn" aria-label="Create app" title="Create app"><svg><use href="#i-plus"/></svg></button>
+    </header>
+
+    <!-- Apps -->
+    <section id="view-apps" class="view is-active">
+      <h1 class="title">Your apps</h1>
+      <div id="apps" class="app-list"></div>
+    </section>
+
+    <!-- Console -->
+    <section id="view-console" class="view">
+      <h1 class="title" id="detailTitle">Console</h1>
+      <div class="actions">
+        <button data-action="start">Start</button>
+        <button data-action="restart">Restart</button>
+        <button data-action="stop">Stop</button>
+      </div>
+      <div class="empty" id="consoleEmpty">Open an app from the Apps tab to use its console.</div>
+      <div class="console" id="consoleBox" hidden>
+        <div id="term"></div>
+      </div>
+      <form class="cmdbar" id="cmdForm" autocomplete="off" hidden>
+        <svg class="cmd-chev"><use href="#i-up"/></svg>
+        <label class="sr-only" for="cmd">Command</label>
+        <input id="cmd" type="text" placeholder="Type a command" autocapitalize="off" autocorrect="off" spellcheck="false" />
+      </form>
+    </section>
+
+    <!-- Files -->
+    <section id="view-files" class="view">
+      <h1 class="title">Files</h1>
+      <div class="empty" id="filesEmpty">Open an app from the Apps tab to browse its files.</div>
+      <div id="filesBox" hidden>
+        <div class="crumb" id="crumb">/app</div>
+        <div id="fileList" class="file-list"></div>
+        <textarea id="fileEditor" spellcheck="false" placeholder="Select a file to edit"></textarea>
+        <button id="saveFileBtn" class="solid">Save file</button>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="view-settings" class="view">
+      <h1 class="title">Settings</h1>
+      <div class="empty" id="settingsEmpty">Open an app from the Apps tab to manage it.</div>
+      <div id="settingsBox" hidden>
+        <p class="note">Deleting removes the container. Your files stay on disk unless you also wipe them.</p>
+        <div class="actions">
+          <button data-action="delete" class="danger">Delete app</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="statbar" aria-live="off">
+      <div class="stat"><svg><use href="#i-clock"/></svg><div><small>Uptime</small><b id="statUptime">–</b></div></div>
+      <div class="stat"><svg><use href="#i-ram"/></svg><div><small>RAM</small><b id="statMem">–</b></div></div>
+      <div class="stat"><svg><use href="#i-cpu"/></svg><div><small>CPU</small><b id="statCpu">–</b></div></div>
+    </footer>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/5.3.0/lib/xterm.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm-addon-fit/0.8.0/xterm-addon-fit.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
