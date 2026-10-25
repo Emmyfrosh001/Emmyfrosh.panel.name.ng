@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EmmyHost - Log in</title>
+<style>
+:root{--bg:#04100b;--card:#082016;--line:#12432c;--g:#2cf07f;--t:#e8fff2;--m:#8fb9a3}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--t);font:16px system-ui,-apple-system,sans-serif;padding:16px}
+.box{width:100%;max-width:360px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px}
+h1{margin:0 0 4px;font-size:22px}h1 b{color:var(--g)}p{color:var(--m);margin:0 0 16px;font-size:14px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{flex:1;background:none;color:var(--m);border:1px solid var(--line);border-radius:10px;padding:9px;font:inherit;cursor:pointer}
+.tabs button.on{background:var(--g);color:#032012;font-weight:700;border-color:var(--g)}
+input{width:100%;background:#04140d;border:1px solid var(--line);color:var(--t);border-radius:10px;padding:12px;font:inherit;margin-bottom:10px}
+.go{width:100%;background:var(--g);color:#032012;border:0;border-radius:10px;padding:12px;font:inherit;font-weight:700;cursor:pointer}
+#e{color:#ff6b7a;font-size:14px;min-height:20px;margin-bottom:8px}a{color:var(--g)}
+</style></head><body><div class="box">
+<h1>Emmy<b>Host</b></h1><p><a href="/">Back to home</a></p>
+<div class="tabs"><button id="t0" class="on">Log in</button><button id="t1">Sign up</button></div>
+<input id="u" placeholder="Username" autocapitalize="none" autocomplete="username">
+<input id="p" type="password" placeholder="Password" autocomplete="current-password">
+<div id="e"></div><button class="go" id="go">Log in</button></div>
+<script>
+let m=location.hash==="#signup"?1:0;const $=i=>document.getElementById(i);
+function mode(n){m=n;$("t0").className=n?"":"on";$("t1").className=n?"on":"";$("go").textContent=n?"Create account":"Log in"}
+$("t0").onclick=()=>mode(0);$("t1").onclick=()=>mode(1);mode(m);
+async function send(){$("e").textContent="";$("go").disabled=true;
+try{const r=await fetch("/auth/"+(m?"signup":"login"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:$("u").value,password:$("p").value})});
+const j=await r.json();if(!r.ok)throw new Error(j.error);location.href="/"}catch(e){$("e").textContent=e.message}$("go").disabled=false}
+$("go").onclick=send;$("p").onkeydown=e=>e.key==="Enter"&&send();
+</script></body></html>
